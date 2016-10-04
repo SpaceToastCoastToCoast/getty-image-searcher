@@ -12,6 +12,7 @@ html {
   border: 10px solid #dfdfdf;
   margin: 0px;
   z-index: 999;
+  box-shadow: 0 0 2px #2f2f2f;
 }
 #main {
   position: absolute;
@@ -21,4 +22,7 @@ html {
   flex-flow: row wrap;
   align-items: flex-start;
   justify-content: center;
+}
+.result {
+  margin: 2px;
 }
