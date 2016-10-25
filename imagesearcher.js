@@ -1,29 +1,94 @@
-var button = document.getElementById('searchButton');
-var searchInput = document.getElementById('textField');
-var mainDiv = document.getElementById('main');
 
-function onDataLoaded() {
-  main.innerHTML = "";
-  var data = JSON.parse(this.responseText);
-  var images = data.images;
-  for(var image in images) {
-    var imgTag = document.createElement('img');
-    console.log(images[image].display_sizes[0].uri);
-    imgTag.src = images[image].display_sizes[0].uri;
-    imgTag.style.width = "150px";
-    imgTag.className = "result";
-    mainDiv.appendChild(imgTag);
+var searchInput = document.getElementById('textField');
+
+class SearchPage extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      searchQuery: "cats",
+      data: []
+    };
+
+    this.onDataLoaded = this.onDataLoaded.bind(this);
+    this.searchGetty = this.searchGetty.bind(this);
+  }
+
+  onDataLoaded(data) {
+    const parsedSearchData = JSON.parse(data.currentTarget.response).images;
+    this.setState({data: parsedSearchData});
+    this.render();
+  }
+
+  searchGetty() {
+    const query = document.getElementById("textField").value;
+    this.state.searchQuery = query;
+    var oReq = new XMLHttpRequest();
+
+    oReq.addEventListener('load', this.onDataLoaded);
+    oReq.open('GET', this.props.searchUrl + this.state.searchQuery);
+    oReq.setRequestHeader('Api-Key', 'ksewve2mew2azjbecvjv6v9s');
+    oReq.send();
+  }
+
+  render() {
+    return (
+      <div>
+        <div id="searchbar">
+          <div>Search for...
+            <input type="text" name="searchfor" id="textField"
+            className="searchComponents"></input>
+            <button id="searchButton" className="searchComponents"
+            onClick={this.searchGetty} >Search</button>
+          </div>
+        </div>
+        <ResultList data={this.state.data} />
+      </div>
+    );
   }
 }
 
-function search() {
-  var searchQuery = searchInput.value;
-  var oReq = new XMLHttpRequest();
-
-  oReq.addEventListener('load', onDataLoaded);
-  oReq.open('GET', 'https://api.gettyimages.com/v3/search/images?phrase=' + searchQuery);
-  oReq.setRequestHeader('Api-Key', 'ksewve2mew2azjbecvjv6v9s');
-  oReq.send();
+SearchPage.defaultProps = {
+  data: []
+}
+SearchPage.defaultProps = {
+  data: React.PropTypes.array
 }
 
-button.addEventListener('click', search);
+class ResultList extends React.Component {
+  render() {
+    const resultListNode = this.props.data.map((dataItem) => {
+      return(
+        <ResultItem
+          imageSource={dataItem.display_sizes[0].uri}
+          alt={dataItem.caption}
+          key={dataItem.id}
+        />
+      )
+    })
+    return (
+      <div id="main">
+      {resultListNode}
+      </div>
+    )
+  }
+}
+
+class ResultItem extends React.Component {
+  render() {
+    return (
+      <div>
+        <img
+        className="result"
+        src={this.props.imageSource}
+        alt={this.props.alt}
+        ></img>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(
+  <SearchPage searchUrl='https://api.gettyimages.com/v3/search/images?phrase=' />,
+  document.getElementById("root")
+);
